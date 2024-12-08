@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 565393038404.dkr.ecr.us-east-1.amazonaws.com
+      - echo Installing Trivy for security scanning...
+      - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -t changsathien/flask-app:latest .
+      - echo Scanning the Docker image for vulnerabilities...
+      - ./trivy image --exit-code 1 --severity HIGH,CRITICAL changsathien/flask-app
+  post_build:
+    commands:
+      - echo Pushing the Docker image to Amazon ECR...
+      - docker tag changsathien/flask-app 565393038404.dkr.ecr.us-east-1.amazonaws.com/changsathien/flask-app:latest
+      - docker push 565393038404.dkr.ecr.us-east-1.amazonaws.com/changsathien/flask-app:latest
+      - echo Writing image definitions file...
+      - printf '[{"name":"flask-app","imageUri":"%s"}]' 565393038404.dkr.ecr.us-east-1.amazonaws.com/changsathien/flask-app > imagedefinitions.json
+artifacts:
+  files: imagedefinitions.json
