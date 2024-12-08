@@ -16,7 +16,7 @@ phases:
   post_build:
     commands:
       - echo Pushing the Docker image to Amazon ECR...
-      - docker tag changsathien/flask-app 565393038404.dkr.ecr.us-east-1.amazonaws.com/flask-app:latest
+      - docker tag flask-app:latest 565393038404.dkr.ecr.us-east-1.amazonaws.com/flask-app:latest
       - docker push 565393038404.dkr.ecr.us-east-1.amazonaws.com/flask-app:latest
       - echo Writing image definitions file...
       - printf '[{"name":"flask-app","imageUri":"%s"}]' 565393038404.dkr.ecr.us-east-1.amazonaws.com/flask-app:latest > imagedefinitions.json
